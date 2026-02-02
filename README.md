@@ -6,9 +6,17 @@ This package allows OpenClaw agents to interact with BitAgent bonding curves on 
 
 The skill runs via the CLI plugin at **scripts/index.ts**, which provides the following capabilities: `launch`, `buy`, `sell`.
 
-## Installation
+## Installation from Source
 
-1. **Add the skill directory** to OpenClaw config (`~/.openclaw/openclaw.json`):
+1. Clone the openclaw-bitagent repository with:
+
+   ```bash
+   git clone https://github.com/unibaseio/openclaw-bitagent bitagent-skill
+   ```
+
+   Make sure the repository cloned is renamed to `bitagent-skill` as this is the skill name.
+
+2. **Add the skill directory** to OpenClaw config (`~/.openclaw/openclaw.json`):
 
    ```json
    {
@@ -22,7 +30,7 @@ The skill runs via the CLI plugin at **scripts/index.ts**, which provides the fo
 
    Use the path to the root of this repository.
 
-2. **Install dependencies**:
+3. **Install dependencies**:
 
    ```bash
    cd /path/to/bitagent-skill
