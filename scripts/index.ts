@@ -169,27 +169,46 @@ async function getAuthenticatedClient() {
     return { client, token, account };
 }
 
-async function getCreatorByToken(tokenAddress: string): Promise<string> {
+async function getCreatorByToken(tokenAddress: string, fallbackAddress?: string): Promise<string> {
     try {
-        const res = await fetch(`${config.apiBase}/agents?token=${tokenAddress}`);
-        const json = await res.json();
-        // Check for nested data structure: { data: { agents: [...] } } or { agents: [...] }
-        const agents = json.data?.agents || json.agents;
-        if (agents && agents.length > 0) {
-            return agents[0].creator;
+        // Try direct agent lookup first (singular /agent endpoint)
+        const res = await fetch(`${config.apiBase}/agent?token=${tokenAddress}`);
+        if (res.ok) {
+            const json = await res.json();
+            const creator = json.data?.creator || json.creator;
+            if (creator) return creator;
         }
-        const res2 = await fetch(`${config.apiBase}/agents/${tokenAddress}`);
-        const json2 = await res2.json();
-        /* 
-           Check for nested data structure: 
-           { data: { creator: ... } } (common wrapper)
-           or { creator: ... } (direct return)
-        */
-        const creator = json2.data?.creator || json2.creator;
-        if (creator) return creator;
+
+        // Fallback to list lookup (plural /agents endpoint)
+        const resList = await fetch(`${config.apiBase}/agents?token=${tokenAddress}`);
+        if (resList.ok) {
+            const jsonList = await resList.json();
+            const agents = jsonList.data?.agents || jsonList.agents;
+            if (agents && agents.length > 0) {
+                const match = agents.find((a: any) => a.token.toLowerCase() === tokenAddress.toLowerCase());
+                if (match) return match.creator;
+                // If no exact match, return first one as best guess if list is small/relevant
+                return agents[0].creator;
+            }
+        }
+
+        // Try detail endpoint /agents/:address
+        const resDetail = await fetch(`${config.apiBase}/agents/${tokenAddress}`);
+        if (resDetail.ok) {
+            const jsonDetail = await resDetail.json();
+            const creator = jsonDetail.data?.creator || jsonDetail.creator;
+            if (creator) return creator;
+        }
+
     } catch (e) {
-        console.warn("Could not fetch creator from API, defaulting to current account might fail if not creator.");
+        console.warn("Could not fetch creator from API.");
     }
+
+    if (fallbackAddress) {
+        console.warn(`Defaulting to current account ${fallbackAddress} as creator.`);
+        return fallbackAddress;
+    }
+
     throw new Error(`Could not find creator for token ${tokenAddress}. Please ensure the token is registered on this chain.`);
 }
 
@@ -346,7 +365,11 @@ async function trade(side: 'buy' | 'sell', tokenAddress: string | undefined, amo
     const tradeParams = {
         amount: parseEther(amount),
         slippage: 50, // 0.5%
-        onError: (e: any) => console.error(e)
+        onError: (e: any) => {
+            console.error("Trade error:", e);
+            if (e.shortMessage) console.error("Short Message:", e.shortMessage);
+            if (e.cause) console.error("Cause:", e.cause);
+        }
     };
 
     let receipt;
