@@ -22,6 +22,77 @@ type Config = {
     tokens: Record<string, TokenConfig>;
 };
 
+
+// Token Configurations
+const TOKENS_97: Record<string, TokenConfig> = {
+    'UB': {
+        symbol: 'UB',
+        token: '0x7e624D1b87ecb3985E94dbE3Db184594e4E5DB37',
+        decimals: 18,
+        initialPrice: 8e-6,
+        stepCount: 100,
+    },
+    'USD1': {
+        symbol: 'USD1',
+        token: '0xB9951cd2921f72AE7f2d7C9ec2036bAD80076085',
+        decimals: 18,
+        initialPrice: 8e-7,
+        stepCount: 100,
+    },
+    'WBNB': {
+        symbol: 'WBNB',
+        token: '0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd',
+        decimals: 18,
+        initialPrice: 8e-10,
+        stepCount: 99,
+    },
+};
+
+const TOKENS_56: Record<string, TokenConfig> = {
+    'UB': {
+        symbol: 'UB',
+        token: '0x40b8129B786D766267A7a118cF8C07E31CDB6Fde',
+        decimals: 18,
+        initialPrice: 8e-6,
+        stepCount: 100,
+    },
+    'USD1': {
+        symbol: 'USD1',
+        token: '0x8d0D000Ee44948FC98c9B98A4FA4921476f08B0d',
+        decimals: 18,
+        initialPrice: 8e-7,
+        stepCount: 100,
+    },
+    'WBNB': {
+        symbol: 'WBNB',
+        token: '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c',
+        decimals: 18,
+        initialPrice: 8e-10,
+        stepCount: 99,
+    },
+};
+
+// Main Configurations
+const CONFIGS: Record<number, Config> = {
+    97: { // BSC Testnet
+        chain: bscTestnet,
+        apiBase: 'https://testnet-api.bitagent.io',
+        authApiBase: 'https://testnet-api.bitagent.io',
+        webBase: 'https://testnet.app.bitagent.io',
+        tokens: TOKENS_97
+    },
+    56: { // BSC Mainnet
+        chain: bsc,
+        apiBase: 'https://api.bitagent.io',
+        authApiBase: 'https://api.bitagent.io',
+        webBase: 'https://app.bitagent.io',
+        tokens: TOKENS_56
+    }
+};
+
+const BOND_VERSION = '3.1.0';
+const MAX_SUPPLY_AT_CURVE = 8_500_000_000;
+
 let config: Config;
 
 async function getAuthenticatedClient() {
@@ -302,72 +373,4 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
 }
 
 
-// Token Configurations
-const TOKENS_97: Record<string, TokenConfig> = {
-    'UB': {
-        symbol: 'UB',
-        token: '0x7e624D1b87ecb3985E94dbE3Db184594e4E5DB37',
-        decimals: 18,
-        initialPrice: 8e-6,
-        stepCount: 100,
-    },
-    'USD1': {
-        symbol: 'USD1',
-        token: '0xB9951cd2921f72AE7f2d7C9ec2036bAD80076085',
-        decimals: 18,
-        initialPrice: 8e-7,
-        stepCount: 100,
-    },
-    'WBNB': {
-        symbol: 'WBNB',
-        token: '0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd',
-        decimals: 18,
-        initialPrice: 8e-10,
-        stepCount: 99,
-    },
-};
 
-const TOKENS_56: Record<string, TokenConfig> = {
-    'UB': {
-        symbol: 'UB',
-        token: '0x40b8129B786D766267A7a118cF8C07E31CDB6Fde',
-        decimals: 18,
-        initialPrice: 8e-6,
-        stepCount: 100,
-    },
-    'USD1': {
-        symbol: 'USD1',
-        token: '0x8d0D000Ee44948FC98c9B98A4FA4921476f08B0d',
-        decimals: 18,
-        initialPrice: 8e-7,
-        stepCount: 100,
-    },
-    'WBNB': {
-        symbol: 'WBNB',
-        token: '0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c',
-        decimals: 18,
-        initialPrice: 8e-10,
-        stepCount: 99,
-    },
-};
-
-// Main Configurations
-const CONFIGS: Record<number, Config> = {
-    97: { // BSC Testnet
-        chain: bscTestnet,
-        apiBase: 'https://testnet-api.bitagent.io',
-        authApiBase: 'https://testnet-api.bitagent.io',
-        webBase: 'https://testnet.app.bitagent.io',
-        tokens: TOKENS_97
-    },
-    56: { // BSC Mainnet
-        chain: bsc,
-        apiBase: 'https://api.bitagent.io',
-        authApiBase: 'https://api.bitagent.io',
-        webBase: 'https://app.bitagent.io',
-        tokens: TOKENS_56
-    }
-};
-
-const BOND_VERSION = '3.1.0';
-const MAX_SUPPLY_AT_CURVE = 8_500_000_000;
