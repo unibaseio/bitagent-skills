@@ -1,36 +1,47 @@
 ---
-name: bitagent-skill
-description: Launch, buy, and sell tokens on BitAgent bonding curves via CLI. Use when the user wants to create a new agent token, or trade existing agent tokens on BitAgent (BSC Testnet/Mainnet).
+name: "bitagent-skill"
+description: "Master skill for Bitagent platform. Handles Terminal (ERC-8183) API flows and Bonding Curve CLI trading (launch, buy, sell). Managed via specialized business references."
+version: "1.1"
 ---
 
-# BitAgent Skill
+# BitAgent Master Skills
 
-This skill uses the BitAgent SDK to interact with bonding curves on BSC. It runs as a **CLI only**: the agent must **execute** `scripts/index.ts` and **return the command’s stdout** to the user.
+This repository manages dual-mode operations for the **Bitagent Platform**:
+1.  **Terminal (ERC-8183) Mode**: API-driven identity registration, agent activation, and task orchestration.
+2.  **Bonding Curve Mode**: CLI-driven token issuance and trading via `scripts/index.ts`.
 
-## Config (required)
+## [ACTION] Immediate Action Required
 
-Set in OpenClaw config under `skills.entries.bitagent-skill.env` (or similar) if it is not configured.
+**AS SOON AS THIS SKILL IS LOADED:**
 
-- `PRIVATE_KEY` — Wallet private key (0x...)
+1.  **Authorization**: Check for `UNIBASE_PROXY_AUTH` in `config.json` or Environment. If missing, prompt for [auth.md](references/auth.md).
+2.  **Network Setup**: Ask the owner: "Shall we use BSC Testnet (97) or BSC Mainnet (56)?" before any AIP or CLI operation. Use 97 by default.
+3.  **Dependency Check**: Ensure `npm install` has been run at the repo root for CLI tools.
 
-Ensure dependencies are installed at repo root (`npm install`).
+## Business Domains
 
-## How to run (CLI)
+### 1. Terminal (ERC-8183) Flow
+-   **AIP Registration**: Onboarding autonomous identities.
+-   **Butler Activation**: Provisioning the custodial agent for the user's wallet.
+-   **Task Invocation**: Natural language task orchestration.
+-   **Reference**: [terminal.md](references/terminal.md)
 
-Run from the **repo root** with env set. The CLI prints output to stdout. You must **capture that stdout and return it to the user**.
+### 2. Bonding Curve (CLI Operations)
+Use these when the user wants to trade tokens or launch a new agent token. Run from repo root.
 
-| Tool         | Command                                                                                                      | Result                                                                                               |
-| ------------ | ------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------- |
-| **launch**   | `npx tsx scripts/index.ts launch --network <bsc\|bscTestnet> --name "<name>" --symbol "<symbol>" --reserve-symbol "<UB\|WBNB\|USD1>"` | Deploys a new agent token on a bonding curve. Returns the Contract Address and URL on success.       |
-| **buy**      | `npx tsx scripts/index.ts buy --network <bsc\|bscTestnet> --token "<tokenAddress>" --amount "<amount>"`                                  | Buys a specific amount of tokens. Returns Transaction Hash.                                          |
-| **sell**     | `npx tsx scripts/index.ts sell --network <bsc\|bscTestnet> --token "<tokenAddress>" --amount "<amount>"`                                 | Sells a specific amount of tokens. Returns Transaction Hash.                                         |
+| Tool | Command | Result |
+| :--- | :--- | :--- |
+| **launch** | `npx tsx scripts/index.ts launch --network <bsc\|bscTestnet> --name "<name>" --symbol "<symbol>" --reserve-symbol "<UB\|WBNB\|USD1>"` | Deploys token on curve. |
+| **buy** | `npx tsx scripts/index.ts buy --network <bsc\|bscTestnet> --token "<tokenAddress>" --amount "<amount>"` | Buys tokens. |
+| **sell** | `npx tsx scripts/index.ts sell --network <bsc\|bscTestnet> --token "<tokenAddress>" --amount "<amount>"` | Sells tokens. |
 
-## Flow
+-   **Reference**: [bonding-curve.md](references/bonding-curve.md)
 
-1.  **Launch Agent:** When a user wants to create a token or agent, run the `launch` command. Ensure you ask for Name, Symbol, and which Reserve Token to use (UB, WBNB, USD1) if not provided.
-2.  **Trade (Buy/Sell):** When a user wants to trade, use `buy` or `sell`. Requires the Token Address and Amount.
+### 3. Authorization & Wallet
+-   **Unibase Pay**: Integration with Privy custodial wallets.
+-   **Reference**: [auth.md](references/auth.md)
 
-## File structure
+## Troubleshooting & Config
 
-- **Repo root** — `SKILL.md`, `package.json`.
-- **scripts/index.ts** — CLI implementation.
+-   **Endpoints**: See [config.md](references/config.md).
+-   **Execution Protocol**: All API flows follow the Analysis → Orchestration → Streaming pattern.
