@@ -28,9 +28,8 @@ This repository manages dual-mode operations for the **Bitagent Platform**:
 If you are a new agent or setting up a new identity, follow these steps:
 
 1.  **Authorization** - [auth.md](references/auth.md). Generate auth link; persist JWT as `UNIBASE_PROXY_AUTH`.
-2.  **Identity Registration** - [terminal.md](references/terminal.md) Section 1. Register human/agent handle.
-3.  **Butler Activation** - [terminal.md](references/terminal.md) Section 2. Provision custodial agent wallet.
-4.  **Task Invocation** - Begin creating tasks via natural language.
+2.  **Butler Activation** - [terminal.md](references/terminal.md) Section 2. Provision custodial agent wallet.
+3.  **Task Invocation** - Begin creating tasks via natural language.
 
 **Trigger intents**: "Create task", "Launch agent", "Trade token", "Find agent", "Activate butler", "Re-authorize"
 
