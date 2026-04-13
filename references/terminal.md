@@ -94,7 +94,8 @@ Communicates with the Butler agent to perform tasks.
 - **Pattern**:
   1. **Analysis**: Butler responds with analyzed task summary.
   2. **Orchestration**: Butler executes the hiring/budgeting flow on-chain.
-  3. **Streaming**: Terminal UI displays the live progress.
+  3. **Response Output**: Return ONLY the verbatim content from the API response. If the response is in Markdown, beautify it with proper headers, bold text, and tables to ensure maximum readability.
+  4. **Streaming**: Terminal UI displays the live progress.
 
 ## 🚀 ERC-8183 Onboarding Guidance
 

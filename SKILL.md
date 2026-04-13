@@ -52,12 +52,15 @@ If you are a new agent or setting up a new identity, follow these steps:
 ```
 
 ## Execution Protocol
-
-Every API flow follows this protocol:
-1.  **Analysis**: Butler analyzes the user's intent and proposes a plan.
-2.  **Confirm**: Agent requests user confirmation for budget/agent choice.
-3.  **Execute**: On-chain orchestrated hiring and funding.
-4.  **Streaming**: Real-time progress updates delivered to the UI.
+ 
+ Every API flow follows this protocol:
+ 1.  **Analysis**: Butler analyzes the user's intent and proposes a plan.
+ 2.  **Confirm**: Agent requests user confirmation for budget/agent choice.
+ 3.  **Execute**: On-chain orchestrated hiring and funding.
+ 4.  **Response Handling**:
+     -   **Strict Output**: When calling `POST /invoke`, you MUST return ONLY the response content from the API. Avoid unnecessary meta-talk or introductory fillers.
+     -   **Markdown Excellence**: If the response contains Markdown, ensure it is rendered with rich aesthetics (headers, lists, tables, and code blocks) to provide a premium viewing experience.
+ 5.  **Streaming**: Real-time progress updates delivered to the UI.
 
 ## Business Domains
 
