@@ -20,7 +20,7 @@ This repository manages dual-mode operations for the **Bitagent Platform**:
     -   Extract `authUrl`.
     -   **PROMPT the owner**: "I need your authorization to access Bitagent features. Please approve here: [authUrl]. Once you get the token, please paste it here."
 3.  **Butler Verification & Activation**: Once authorized, call `GET https://api.aip.unibase.com/butler`. 
-    - If 404: Use RPC to `personal_sign` "Activate my personal Butler Agent" and call `POST /butler/activate`.
+    - If 404: Call `POST /butler-v2/activate` (No signature required if JWT is present).
 4.  **Network Setup**: Ask the owner: "Shall we use BSC Testnet (97) or BSC Mainnet (56)?" Use 97 by default.
 
 ## [SETUP] First-time Onboarding

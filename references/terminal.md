@@ -33,9 +33,23 @@ Checks if the user has an active Butler agent.
 - **Header**: `Authorization: Bearer <UNIBASE_PROXY_AUTH>`
 - **Response**: `200 OK` (active) or `404 Not Found` (inactive).
 
-### 2.2 Activation
+### 2.2 Activation (V2 - Recommended)
 
-Activates the specialized Butler agent for the authorized wallet using an ERC8004 cryptographic signature. Use this if the Status Check returns 404.
+Activates the Butler agent using the existing JWT authentication. No fresh signature is required. Use this if the Status Check returns 404.
+
+- **Endpoint**: `POST https://api.aip.unibase.com/butler-v2/activate`
+- **Header**: `Authorization: Bearer <UNIBASE_PROXY_AUTH>`
+- **Body**: (Optional)
+  ```json
+  {
+    "chain_id": 97
+  }
+  ```
+- **Response**: Same as V1.
+
+### 2.3 Activation (V1 - Legacy)
+
+Activates the Butler agent using a manual signature.
 
 - **Endpoint**: `POST https://api.aip.unibase.com/butler/activate`
 - **Header**: `Authorization: Bearer <UNIBASE_PROXY_AUTH>`
