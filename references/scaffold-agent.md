@@ -108,13 +108,26 @@ def extract_wallet_from_token(token: str) -> str:
 
 def process_job(message_text: str) -> str:
     """
-    Receives input text matching the job requirement schema.
-    Must return a string (typically JSON) matching the deliverable schema.
+    Receives input text from the Gateway.
+    IMPORTANT: message_text can be EITHER:
+      - JSON string like '{"english_text": "Hello world"}'
+      - Plain text like 'English to Traditional Chinese Translation where english_text is Hello world'
+    Your handler MUST handle BOTH formats gracefully!
+    Must return a JSON string matching the deliverable schema.
     """
     print("Executing job with input:", message_text)
-    # Write actual python code implementing the user's idea!
     
-    # Must return a string matching the deliverable schema
+    # Try to parse as JSON first, fallback to treating as plain text
+    try:
+        kwargs = json.loads(message_text)
+    except (json.JSONDecodeError, TypeError):
+        # Not JSON — treat the entire message as the primary input
+        kwargs = {"input": message_text}
+    
+    # Write actual python code implementing the user's idea!
+    # Access your input: kwargs.get("your_field") or kwargs.get("input")
+    
+    # Must return a JSON string matching the deliverable schema
     return json.dumps({"text": "Execution successful"})
 
 # ============================================================================
@@ -259,7 +272,7 @@ You must NEVER run `agent.py` synchronously or use any process wait/poll/monitor
 2. **Kill old process + Start new one (SINGLE COMMAND, FIRE AND FORGET)**:
    Copy this EXACT command. Do NOT modify it. Do NOT split it into multiple commands:
    ```bash
-   pkill -f "agent.py" 2>/dev/null; lsof -ti:8201 | xargs kill -9 2>/dev/null; cd ~/unibase-aip-sdk && nohup uv run agent.py > agent.log 2>&1 & disown
+   unset VIRTUAL_ENV; pkill -f "agent.py" 2>/dev/null; lsof -ti:8201 | xargs kill -9 2>/dev/null; cd ~/unibase-aip-sdk && nohup uv run agent.py > agent.log 2>&1 & disown
    ```
 
 3. **IMMEDIATELY reply** to the user:
