@@ -48,37 +48,95 @@ Create the main agent script (e.g., `agent.py`). You **MUST** implement the actu
 3. Pricing must be in `price_v2` with `USDC` currency.
 4. `requirement` and `deliverable` must be standard JSON schemas.
 
+**⚠️ CRITICAL GOTCHAS — READ BEFORE WRITING ANY CODE:**
+These are real bugs that have caused silent failures in production. You MUST avoid ALL of them:
+
+1. **`user_id` is MANDATORY** — Without `user_id`, the SDK silently skips registration AND polling (the agent starts an empty HTTP server and exits). You MUST extract it from the JWT token's `sub` claim and pass it to `expose_as_a2a(user_id=...)`.
+2. **`expose_as_a2a()` is SYNCHRONOUS** — Do NOT `await` it. Do NOT use `async def main()`. Do NOT use `asyncio.run(main())`. Just `def main()` and call `server.run_sync()`.
+3. **There is NO `server.add_route()`** — The handler is passed directly via `handler=process_job` to `expose_as_a2a()`. Do NOT try to attach routes after the fact.
+4. **`handler` takes a `str` and returns a `str`** — It receives plain text (extracted from A2A Message), NOT a dict. Return `json.dumps(...)` if you need structured output.
+5. **Use `AgentJobOffering(...)` type** — Do NOT use raw dicts for job_offerings. Use the typed class from `aip_sdk.types`.
+6. **Use `AgentSkillCard(...)` type** — Do NOT use raw dicts for skills. Use the typed class from `aip_sdk.types`.
+7. **Always pass `aip_endpoint` and `gateway_url` explicitly** — Do NOT rely on implicit defaults.
+8. **Use `uv run agent.py`** — Not `python3 agent.py`.
+
 **Code Template (For reference only, adapt to user requirement):**
 *(Note: If you need to see a full, working production example, you can read `references/agent_sdk_startup_guide.py` inside this skill repository).*
 
 ```python
-import asyncio
+import json
+import base64
 import os
 from aip_sdk import expose_as_a2a
+from aip_sdk.types import AgentJobOffering, AgentJobResource, AgentSkillCard, CostModel
 
-# 1. Implementation of the specific service (Auto-vibe this based on user request!)
-async def process_job(kwargs):
-    print("Executing job with args:", kwargs)
+# ============================================================================
+# Helper: Extract wallet address from JWT token
+# ============================================================================
+
+def extract_wallet_from_token(token: str) -> str:
+    """Decode JWT payload to extract wallet address from 'sub' claim."""
+    try:
+        parts = token.split(".")
+        if len(parts) != 3:
+            return ""
+        payload = parts[1]
+        payload += "=" * ((4 - len(payload) % 4) % 4)
+        data = json.loads(base64.b64decode(payload).decode("utf-8"))
+        return data.get("sub", "")
+    except Exception:
+        return ""
+
+# ============================================================================
+# Implementation of the specific service (Auto-vibe this based on user request!)
+# ============================================================================
+
+def process_job(message_text: str) -> str:
+    """
+    Receives input text matching the job requirement schema.
+    Must return a string (typically JSON) matching the deliverable schema.
+    """
+    print("Executing job with input:", message_text)
     # Write actual python code implementing the user's idea!
     
-    # Must return a dictionary matching the deliverable schema
-    return {"text": "Execution successful"}
+    # Must return a string matching the deliverable schema
+    return json.dumps({"text": "Execution successful"})
+
+# ============================================================================
+# Main
+# ============================================================================
 
 def main():
     # 0. Configure Network Environment and Gateway URL
     os.environ["AGENT_REGISTRATION_CHAIN_ID"] = "<SELECTED_CHAIN_ID>" # e.g. "97" or "56"
     os.environ["GATEWAY_URL"] = "http://0.0.0.0:8081"
 
-    # 1. Define the job offerings
+    # 1. CRITICAL: Extract user_id from the auth token
+    #    Without user_id, the SDK silently skips registration AND polling!
+    auth_token = os.environ.get("UNIBASE_PROXY_AUTH", "")
+    user_id = extract_wallet_from_token(auth_token)
+    if not user_id:
+        print("ERROR: Cannot extract wallet from UNIBASE_PROXY_AUTH. Set it in .env")
+        return
+
+    # 2. Define the job offerings
     job_offerings = [
-        {
-            "name": "<Task Name>",
-            "description": "<Detailed description of what this job offering does>",
-            "job_input": "<Human readable input description>",
-            "job_output": "<Human readable output description>",
+        AgentJobOffering(
+            id="<job_id>",
+            name="<Task Name>",
+            description="<Detailed description of what this job offering does>",
+            type="JOB",
+            price=0.0,
+            price_v2={
+                "type": "fixed",
+                "amount": <User Defined Price Example: 0.5>,
+                "currency": "USDC"
+            },
+            job_input="<Human readable input description>",
+            job_output="<Human readable output description>",
             
             # MANDATORY: requirement must use JSON schema parameter formatting
-            "requirement": {
+            requirement={
                 "type": "object", 
                 "required": ["ticker"], # Update these keys based on actual args
                 "properties": {
@@ -87,21 +145,19 @@ def main():
             },
             
             # MANDATORY: deliverable must use JSON schema formatting
-            "deliverable": {
+            deliverable={
                 "type": "object", 
                 "required": ["text"], 
                 "properties": {
                     "text": {"type": "string", "description": "Complete deliverable"}
                 }
             },
-            "sla_minutes": 1,
-            
-            # MANDATORY: Use price_v2 with USDC
-            "price_v2": {
-                "amount": <User Defined Price Example: 0.5>,
-                "currency": "USDC"
-            }
-        }
+            sla_minutes=1,
+            required_funds=False,
+            restricted=False,
+            hide=False,
+            active=True,
+        )
     ]
 
     print("Starting private agent in Auto Register + POLLING mode...")
@@ -117,8 +173,14 @@ def main():
         port=8201,
         host="0.0.0.0",
         
-        # Fetch the token to pass to the registration automatically
-        privy_token=os.environ.get("UNIBASE_PROXY_AUTH"),
+        # CRITICAL: user_id is REQUIRED for registration & polling to work!
+        user_id=user_id,
+        privy_token=auth_token,
+        
+        # AIP & Gateway endpoints
+        aip_endpoint="https://api.aip.unibase.com",
+        gateway_url=os.environ.get("GATEWAY_URL", "https://gateway.aip.unibase.com"),
+        chain_id=int(os.environ.get("AGENT_REGISTRATION_CHAIN_ID", "97")),
         
         # STRICT POLLING MODE REQUIRED:
         endpoint_url=None,
@@ -126,18 +188,20 @@ def main():
         auto_register=True,
         
         job_offerings=job_offerings,
-        job_resources=[], # Optionally ask the user if they need any API resources
+        job_resources=[], # Optionally add API resources
+        cost_model=CostModel(base_call_fee=0.0),
         skills=[
-            {
-                "name": "<Core Skill>",
-                "description": "<Description of core skill>"
-            }
+            AgentSkillCard(
+                id="<skill_id>",
+                name="<Core Skill>",
+                description="<Description of core skill>",
+                tags=[],
+            )
         ],
-        agent_type="service"
     )
 
     print("Agent is actively polling for jobs via Gateway...")
-    # NOTE: run_sync is a synchronous call!
+    # NOTE: run_sync is a synchronous blocking call!
     server.run_sync()
 
 if __name__ == "__main__":
