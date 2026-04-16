@@ -139,8 +139,8 @@ if __name__ == "__main__":
 After scaffolding the code and writing `agent.py`, you (the AI) must start the service in the background for the user.
 
 **[CRITICAL INSTRUCTION FOR YOU (THE AI)]**
-You must NEVER run `python3 agent.py` synchronously because it contains a polling loop (`server.run_sync()`) that will lock up your terminal forever!
-Instead, follow this exact sequence to securely start it in the background:
+You must NEVER run the script synchronously or monitor/poll its process! The agent runs an infinite POLLING loop (`server.run_sync()`). If you use any wait, poll, or monitor tools on it, you will lock up and fail!
+Instead, follow this exact sequence to securely start it as a fire-and-forget daemon:
 
 1. **Authorization Check**: 
    Ask the user to provide their Authorization token (if it's not already configured). 
@@ -156,11 +156,13 @@ Instead, follow this exact sequence to securely start it in the background:
    lsof -ti:8081 | xargs kill -9 || true
    ```
 
-3. **Start in Background**: 
-   Launch the agent completely detached into the background using `nohup` and `uv run`:
+3. **Start in Background (FIRE AND FORGET)**: 
+   Launch the agent completely detached. You MUST execute this exact command containing `disown` so the terminal returns immediately, and you MUST NOT use any process monitoring tools afterward!
    ```bash
-   cd unibase-aip-sdk
+   cd ~/unibase-aip-sdk
    nohup uv run agent.py > agent.log 2>&1 &
+   disown
    ```
+   *Note: If `uv` is not installed or errors, fallback to `nohup python3 agent.py > agent.log 2>&1 & disown`.*
    
-This ensures the service runs persistently in the background without blocking your tool execution, and properly clears the port for the new instance!
+Once the command is sent, IMMEDIATELY reply to the user that the service is running in the background and tell them they can view the logs via `cat ~/unibase-aip-sdk/agent.log`. Do not wait for verification!
