@@ -63,8 +63,9 @@ async def process_job(kwargs):
     return {"text": "Execution successful"}
 
 async def main():
-    # 0. Configure Network Environment based on user's selection
+    # 0. Configure Network Environment and Gateway URL
     os.environ["AGENT_REGISTRATION_CHAIN_ID"] = "<SELECTED_CHAIN_ID>" # e.g. "97" or "56"
+    os.environ["GATEWAY_URL"] = "http://0.0.0.0:8081"
 
     # 1. Define the job offerings
     job_offerings = [
@@ -133,27 +134,33 @@ if __name__ == "__main__":
     asyncio.run(main())
 ```
 
-## 3. Guide the User to Run & Authorize
+## 3. Authorize and Start Background Service
 
-After scaffolding the code and writing `agent.py`, instruct the user to run their agent.
+After scaffolding the code and writing `agent.py`, you (the AI) must start the service in the background for the user.
 
 **[CRITICAL INSTRUCTION FOR YOU (THE AI)]**
-Do **NOT** attempt to run `python3 agent.py` yourself using your terminal tools! 
-The agent runs an infinite POLLING loop (`server.run_sync()`), so if you run it, your terminal command will hang forever and you will get stuck in a timeout loop! 
-You MUST only print the instructions and let the user run it in their own separate terminal tab.
+You must NEVER run `python3 agent.py` synchronously because it contains a polling loop (`server.run_sync()`) that will lock up your terminal forever!
+Instead, follow this exact sequence to securely start it in the background:
 
-**[CRITICAL WARNING FOR THE USER'S AUTHORIZATION]**
-You **MUST** explicitly tell the user that the first time they run `python3 agent.py`, their terminal will pause and print an **Auth URL** (e.g., `https://api.pay.unibase.com/v...`).
-Instruct the user to:
-1. Open a new terminal tab and run:
+1. **Authorization Check**: 
+   Ask the user to provide their Authorization token (if it's not already configured). 
+   Once they give you the token, write it to `unibase-aip-sdk/.env`:
+   ```env
+   UNIBASE_PROXY_AUTH=<the_provided_token>
+   ```
+
+2. **Kill Existing Process**: 
+   Since `GATEWAY_URL` is forced to port `8081`, you must stop any existing agents taking up that port or running `agent.py` to prevent conflicts:
+   ```bash
+   pkill -f "agent.py" || true
+   lsof -ti:8081 | xargs kill -9 || true
+   ```
+
+3. **Start in Background**: 
+   Launch the agent completely detached into the background using `nohup` and `uv run`:
    ```bash
    cd unibase-aip-sdk
-   source venv/bin/activate
-   python3 agent.py
+   nohup uv run agent.py > agent.log 2>&1 &
    ```
-2. Click the Auth URL output in their terminal to open it in their browser.
-3. Sign the transaction with their Master Wallet to authorize the Agent.
-4. Copy the resulting Bearer Token.
-5. Paste it back into their terminal and press Enter.
-
-Only then will the agent finish its auto-registration and officially begin polling the gateway.
+   
+This ensures the service runs persistently in the background without blocking your tool execution, and properly clears the port for the new instance!
