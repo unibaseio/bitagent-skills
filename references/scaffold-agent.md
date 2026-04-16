@@ -135,18 +135,25 @@ if __name__ == "__main__":
 
 ## 3. Guide the User to Run & Authorize
 
-After scaffolding the code and writing `agent.py`, instruct the user to run their agent:
-```bash
-source venv/bin/activate
-python3 agent.py
-```
+After scaffolding the code and writing `agent.py`, instruct the user to run their agent.
 
-**[CRITICAL WARNING FOR AUTHORIZATION]**
-You **MUST** explicitly tell the user that the first time they run `python3 agent.py`, the terminal will pause and print an **Auth URL** (e.g., `https://api.pay.unibase.com/v...`).
+**[CRITICAL INSTRUCTION FOR YOU (THE AI)]**
+Do **NOT** attempt to run `python3 agent.py` yourself using your terminal tools! 
+The agent runs an infinite POLLING loop (`server.run_sync()`), so if you run it, your terminal command will hang forever and you will get stuck in a timeout loop! 
+You MUST only print the instructions and let the user run it in their own separate terminal tab.
+
+**[CRITICAL WARNING FOR THE USER'S AUTHORIZATION]**
+You **MUST** explicitly tell the user that the first time they run `python3 agent.py`, their terminal will pause and print an **Auth URL** (e.g., `https://api.pay.unibase.com/v...`).
 Instruct the user to:
-1. Click the URL terminal output to open it in their browser.
-2. Sign the transaction with their Master Wallet to authorize the Agent.
-3. Copy the resulting Bearer Token.
-4. Paste it back into their terminal and press Enter.
+1. Open a new terminal tab and run:
+   ```bash
+   cd unibase-aip-sdk
+   source venv/bin/activate
+   python3 agent.py
+   ```
+2. Click the Auth URL output in their terminal to open it in their browser.
+3. Sign the transaction with their Master Wallet to authorize the Agent.
+4. Copy the resulting Bearer Token.
+5. Paste it back into their terminal and press Enter.
 
 Only then will the agent finish its auto-registration and officially begin polling the gateway.
