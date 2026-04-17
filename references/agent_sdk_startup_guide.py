@@ -44,30 +44,28 @@ Binance API docs:
     │         │                                                       │
     │         ├── endpoint_url is set →  PUSH mode (Gateway calls)     │
     │         └── endpoint_url=None  →  POLLING mode (Agent polls)     │
-    │              + via_gateway=True  → Butler discovers via gateway  │
+    │              + via_gateway=True  → Terminal discovers via gateway  │
     │                                                                 │
     └─────────────────────────────────────────────────────────────────┘
 
 =============================================================================
-2. Butler Agent + Job Queue (NEW)
+2. Terminal Agent + Job Queue (NEW)
 =============================================================================
 
-Agents registered via SDK can be discovered and called by Butler via the Gateway:
+    User → Terminal → search_job_offerings() → Gateway → Agent (your service)
 
-    User → Butler → search_job_offerings() → Gateway → Agent (your service)
-
-Butler discovers agents via job_offerings vector search. When an agent is hired:
-  - If agent has endpoint_url (PUSH) → Butler calls directly
-  - If agent has via_gateway=True → Butler routes via Gateway job queue:
+Terminal discovers agents via job_offerings vector search. When an agent is hired:
+  - If agent has endpoint_url (PUSH) → Terminal calls directly
+  - If agent has via_gateway=True → Terminal routes via Gateway job queue:
       GET  /gateway/jobs/poll     (agent polls, every 3s)
       POST /gateway/jobs/complete (agent submits result)
 
-Key: set via_gateway=True when endpoint_url=None and you want Butler to call you!
+Key: set via_gateway=True when endpoint_url=None and you want Terminal to call you!
 
     expose_as_a2a(
         endpoint_url=None,          # Private agent (no public URL)
-        via_gateway=True,           # KEY: Butler can discover and route via gateway
-        job_offerings=[...],         # REQUIRED: so Butler finds you in search
+        via_gateway=True,           # KEY: Terminal can discover and route via gateway
+        job_offerings=[...],         # REQUIRED: so Terminal finds you in search
         ...
     )
 
@@ -687,7 +685,7 @@ def build_server(
         print(f"  URL:      {endpoint_url}")
     if polling:
         if via_gateway:
-            print(f"  Queue:    JOB-QUEUE (/gateway/jobs/poll) - Butler can discover this agent")
+            print(f"  Queue:    JOB-QUEUE (/gateway/jobs/poll) - Terminal can discover this agent")
         else:
             print(f"  Queue:    TASK-QUEUE (/gateway/tasks/poll)")
     print(f"  Port:     {port}")
@@ -912,7 +910,7 @@ def example_polling_mode():
         handle=handle,
         auto_register=True,
         endpoint_url=None,
-        via_gateway=True,            # KEY: Butler can discover & route via gateway job queue
+        via_gateway=True,            # KEY: Terminal can discover & route via gateway job queue
         cost_model=CostModel(base_call_fee=0.0),
         chain_id=97,
         skills=[
@@ -929,7 +927,7 @@ def example_polling_mode():
     )
 
     print(f"  Mode:     POLLING (no public URL)")
-    print(f"  Queue:    JOB-QUEUE (/gateway/jobs/poll) - Butler can discover this agent")
+    print(f"  Queue:    JOB-QUEUE (/gateway/jobs/poll) - Terminal can discover this agent")
     print(f"  Register: POST https://api.aip.unibase.com/agents/register")
     print()
     print("  Chain:")

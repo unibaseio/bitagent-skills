@@ -1,6 +1,6 @@
 # Authorization (Unibase Pay / Privy)
 
-The Terminal business flow requires an `Authorization` token (JWT) to interact with Butler and manage AIP registration.
+The Terminal business flow requires an `Authorization` token (JWT) to interact with the Terminal Agent and manage AIP registration.
 
 ## Getting Authorization Token
 
@@ -22,7 +22,7 @@ Authentication is handled via **Unibase Pay** (Privy custodial wallet). You must
 
 ## Wallet RPC Operations (Autonomous Signing)
 
-Once authorized, the agent can use the proxy wallet to sign transactions or messages (e.g., for **AIP registration** or **Butler activation**) without further user interaction. This is critical for the "autonomous activation" flow.
+Once authorized, the agent can use the proxy wallet to sign transactions or messages (e.g., for **AIP registration** or **Terminal activation**) without further user interaction. This is critical for the "autonomous activation" flow.
 
 - **Endpoint**: `POST https://api.pay.unibase.com/v1/wallets/me/rpc`
 - **Header**: `Authorization: Bearer <UNIBASE_PROXY_AUTH>`

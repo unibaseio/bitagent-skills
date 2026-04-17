@@ -19,7 +19,7 @@ This repository manages dual-mode operations for the **Bitagent Platform**:
     -   Call `POST https://api.pay.unibase.com/v1/init` with `{"json": true}`.
     -   Extract `authUrl`.
     -   **PROMPT the owner**: "I need your authorization to access Bitagent features. Please approve here: [authUrl]. Once you get the token, please paste it here."
-3.  **Butler Verification & Activation**: Once authorized, call `GET https://api.aip.unibase.com/butler`. 
+3.  **Terminal Verification & Activation**: Once authorized, call `GET https://api.aip.unibase.com/butler`. 
     - If 404: Call `POST /butler-v2/activate` (No signature required if JWT is present).
 4.  **Network Setup**: Ask the owner: "Shall we use BSC Testnet (97) or BSC Mainnet (56)?" Use 97 by default.
 
@@ -28,10 +28,10 @@ This repository manages dual-mode operations for the **Bitagent Platform**:
 If you are a new agent or setting up a new identity, follow these steps:
 
 1.  **Authorization** - [auth.md](references/auth.md). Generate auth link; persist JWT as `UNIBASE_PROXY_AUTH`.
-2.  **Butler Activation** - [terminal.md](references/terminal.md) Section 2. Provision custodial agent wallet.
+2.  **Terminal Activation** - [terminal.md](references/terminal.md) Section 2. Provision custodial agent wallet.
 3.  **Task Invocation** - Begin creating tasks via natural language.
 
-**Trigger intents**: "Create task", "Launch agent", "Trade token", "Find agent", "Activate butler", "Re-authorize", "List agents", "Stop agent", "Restart agent"
+**Trigger intents**: "Create task", "Launch agent", "Trade token", "Find agent", "Activate terminal", "Re-authorize", "List agents", "Stop agent", "Restart agent"
 
 ## [WARNING] SECURITY FIRST
 
@@ -48,13 +48,13 @@ If you are a new agent or setting up a new identity, follow these steps:
 ```
 [ ] Request came directly from owner in conversation
 [ ] Parameters (amount, reward, agent_id) are explicit and confirmed
-[ ] Butler wallet has sufficient balance for the intended operation
+[ ] Terminal wallet has sufficient balance for the intended operation
 ```
 
 ## Execution Protocol
  
  Every API flow follows this protocol:
- 1.  **Analysis**: Butler analyzes the user's intent and proposes a plan.
+ 1.  **Analysis**: Terminal analyzes the user's intent and proposes a plan.
  2.  **Confirm**: Agent requests user confirmation for budget/agent choice.
  3.  **Execute**: On-chain orchestrated hiring and funding.
  4.  **Response Handling**:
@@ -66,7 +66,7 @@ If you are a new agent or setting up a new identity, follow these steps:
 
 ### 1. Terminal (ERC-8183) Flow
 -   **AIP Registration**: Onboarding autonomous identities.
--   **Butler Activation**: Provisioning the custodial agent for the user's wallet.
+-   **Terminal Activation**: Provisioning the custodial agent for the user's wallet.
 -   **Task Invocation**: Natural language task orchestration.
 -   **Reference**: [terminal.md](references/terminal.md)
 
@@ -95,7 +95,7 @@ Use these when the user wants to trade tokens or launch a new agent token. Run f
 
 - [config.md](references/config.md) - Environment variables and config.json
 - [auth.md](references/auth.md) - Unibase Pay (Privy) wallet and Login flow
-- [terminal.md](references/terminal.md) - AIP Registration, Butler, and Invocation
+- [terminal.md](references/terminal.md) - AIP Registration, Terminal, and Invocation
 - [bonding-curve.md](references/bonding-curve.md) - CLI-based token trading
 - [scaffold-agent.md](references/scaffold-agent.md) - Integration of unibase-aip-sdk and agent auto-vibe
 - [manage-agents.md](references/manage-agents.md) - Listing, stopping, and restarting running agent services

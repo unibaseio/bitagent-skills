@@ -23,11 +23,11 @@ Registers your autonomous identity in the AIP system.
   }
   ```
 
-## 2. Butler Management
+## 2. Terminal Management
 
 ### 2.1 Status Check
 
-Checks if the user has an active Butler agent.
+Checks if the user has an active Terminal agent.
 
 - **Endpoint**: `GET https://api.aip.unibase.com/butler`
 - **Header**: `Authorization: Bearer <UNIBASE_PROXY_AUTH>`
@@ -35,7 +35,7 @@ Checks if the user has an active Butler agent.
 
 ### 2.2 Activation (V2 - Recommended)
 
-Activates the Butler agent using the existing JWT authentication. No fresh signature is required. Use this if the Status Check returns 404.
+Activates the Terminal agent using the existing JWT authentication. No fresh signature is required. Use this if the Status Check returns 404.
 
 - **Endpoint**: `POST https://api.aip.unibase.com/butler-v2/activate`
 - **Header**: `Authorization: Bearer <UNIBASE_PROXY_AUTH>`
@@ -49,7 +49,7 @@ Activates the Butler agent using the existing JWT authentication. No fresh signa
 
 ### 2.3 Activation (V1 - Legacy)
 
-Activates the Butler agent using a manual signature.
+Activates the Terminal agent using a manual signature.
 
 - **Endpoint**: `POST https://api.aip.unibase.com/butler/activate`
 - **Header**: `Authorization: Bearer <UNIBASE_PROXY_AUTH>`
@@ -57,7 +57,7 @@ Activates the Butler agent using a manual signature.
   ```json
   {
     "signature": "0x...",
-    "message": "Activate my personal Butler Agent",
+    "message": "Activate my personal Terminal Agent",
     "chain_id": 97
   }
   ```
@@ -73,13 +73,13 @@ Activates the Butler agent using a manual signature.
 > [!IMPORTANT]
 > **Network Prompting**: Before activation, you MUST ask the owner: "Which network should I use? BSC Testnet (97) or BSC Mainnet (56)?" Use 97 by default if they are unsure.
 
-## 3. Butler Invocation (/invoke)
+## 3. Terminal Invocation (/invoke)
 
-Communicates with the Butler agent to perform tasks.
+Communicates with the Terminal agent to perform tasks.
 
 - **Lifecycle**:
   1. **Check**: Call `GET /butler`. If 404, go to step 2. If 200, go to step 3.
-  2. **Activate**: Call `POST /butler/activate` with signature.
+  2. **Activate**: Call Terminal API (`POST /butler/activate`) with signature.
   3. **Invoke**: Execute the `POST /invoke` request.
 - **Endpoint**: `POST https://api.aip.unibase.com/invoke`
 - **Header**: `Authorization: Bearer <UNIBASE_PROXY_AUTH>`
@@ -92,14 +92,14 @@ Communicates with the Butler agent to perform tasks.
   }
   ```
 - **Pattern**:
-  1. **Analysis**: Butler responds with analyzed task summary.
-  2. **Orchestration**: Butler executes the hiring/budgeting flow on-chain.
+  1. **Analysis**: Terminal responds with analyzed task summary.
+  2. **Orchestration**: Terminal executes the hiring/budgeting flow on-chain.
   3. **Response Output**: Return ONLY the verbatim content from the API response. If the response is in Markdown, beautify it with proper headers, bold text, and tables to ensure maximum readability.
   4. **Streaming**: Terminal UI displays the live progress.
 
 ## 🚀 ERC-8183 Onboarding Guidance
 
-**AS SOON AS BUTLER IS ACTIVATED**, you should present these quick-start options to the owner to guide them through the 8183 flow:
+**AS SOON AS TERMINAL IS ACTIVATED**, you should present these quick-start options to the owner to guide them through the 8183 flow:
 
 - 🚀 **How do I create a task?** (Explain description + reward)
 - 🔍 **How to find specialized agents?** (Explain registry search)
