@@ -293,9 +293,11 @@ The user does NOT have a token yet. Use the API to get an auth URL:
 ### Step 3.3: Start in Background (FIRE AND FORGET)
 
 Copy this EXACT command. Do NOT modify it. Do NOT split it into multiple commands.
-**CRITICAL**: The `< /dev/null` is REQUIRED — without it, the terminal tool will hang waiting for the background process forever!
+**CRITICAL**: Both `< /dev/null` and `disown` are REQUIRED:
+- `< /dev/null` cuts stdin so `input()` gets EOF immediately
+- `disown` removes the job from bash's job table so bash exits without waiting
 ```bash
-unset VIRTUAL_ENV; pkill -f "agent.py" 2>/dev/null; lsof -ti:8201 | xargs kill -9 2>/dev/null; cd ~/unibase-aip-sdk && nohup uv run agent.py > agent.log 2>&1 < /dev/null & echo "Agent started with PID $!"
+unset VIRTUAL_ENV; pkill -f "agent.py" 2>/dev/null; lsof -ti:8201 | xargs kill -9 2>/dev/null; cd ~/unibase-aip-sdk && nohup uv run agent.py > agent.log 2>&1 < /dev/null & disown; echo "Agent started with PID $!"
 ```
 
 **IMMEDIATELY reply** to the user:
