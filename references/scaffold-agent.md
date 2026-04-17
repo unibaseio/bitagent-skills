@@ -238,11 +238,12 @@ if __name__ == "__main__":
 
 ## 3. Authorize and Start Background Service
 
-After writing the NEW `agent.py`, you (the AI) must validate then launch it.
+After writing the NEW `agent.py`, you (the AI) must validate, launch, authorize, then restart it.
 
 **[PRE-LAUNCH CHECKLIST — VERIFY BEFORE STARTING]**
 Before launching, you MUST grep the generated `agent.py` to confirm these lines exist. If ANY are missing, rewrite the file!
 ```bash
+cd ~/unibase-aip-sdk
 grep -q "user_id=" agent.py && echo "✅ user_id" || echo "❌ MISSING user_id"
 grep -q "privy_token=" agent.py && echo "✅ privy_token" || echo "❌ MISSING privy_token"
 grep -q "aip_endpoint=" agent.py && echo "✅ aip_endpoint" || echo "❌ MISSING aip_endpoint"
@@ -263,19 +264,47 @@ You must NEVER run `agent.py` synchronously or use any process wait/poll/monitor
 
 **Step-by-step launch sequence:**
 
-1. **Write auth token to `.env`** (the variable name MUST be `UNIBASE_PROXY_AUTH`, not `UNIBASE_TOKEN` or anything else):
+### Step 3.1: Check if token already exists
+
+```bash
+grep -q "UNIBASE_PROXY_AUTH=" ~/unibase-aip-sdk/.env 2>/dev/null && echo "✅ Token exists, skip to Step 3.3" || echo "⚠️ No token yet, proceed to Step 3.2"
+```
+
+### Step 3.2: First Run — Get Authorization URL (ONLY if no token exists)
+
+The user does NOT have a token yet. You must start the agent so the SDK outputs the auth URL.
+
+1. **Start agent in background first** to capture the auth URL:
+   ```bash
+   cd ~/unibase-aip-sdk && nohup uv run agent.py > agent.log 2>&1 & disown
+   sleep 5
+   cat agent.log
+   ```
+   The log will contain an authorization URL like:
+   ```
+   👉 Please click this link to approve:
+   https://auth.pay.unibase.com?code=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+   ```
+
+2. **Tell the user** to:
+   - Open the link in their browser
+   - Sign the authorization with their wallet  
+   - Paste the returned JWT token back to you
+
+3. **Once the user provides the token**, save it to `.env` and proceed to Step 3.3:
    ```bash
    echo "UNIBASE_PROXY_AUTH=<the_token>" > ~/unibase-aip-sdk/.env
    ```
-   If `.env` already has `UNIBASE_PROXY_AUTH` set, skip this step.
 
-2. **Kill old process + Start new one (SINGLE COMMAND, FIRE AND FORGET)**:
-   Copy this EXACT command. Do NOT modify it. Do NOT split it into multiple commands:
-   ```bash
-   unset VIRTUAL_ENV; pkill -f "agent.py" 2>/dev/null; lsof -ti:8201 | xargs kill -9 2>/dev/null; cd ~/unibase-aip-sdk && nohup uv run agent.py > agent.log 2>&1 & disown
-   ```
+### Step 3.3: Start in Background (FIRE AND FORGET)
 
-3. **IMMEDIATELY reply** to the user:
-   > "Agent is now running in the background. Check logs: `tail -f ~/unibase-aip-sdk/agent.log`"
+Copy this EXACT command. Do NOT modify it. Do NOT split it into multiple commands:
+```bash
+unset VIRTUAL_ENV; pkill -f "agent.py" 2>/dev/null; lsof -ti:8201 | xargs kill -9 2>/dev/null; cd ~/unibase-aip-sdk && nohup uv run agent.py > agent.log 2>&1 & disown
+```
+
+**IMMEDIATELY reply** to the user:
+> "Agent is now running in the background. Check logs: `tail -f ~/unibase-aip-sdk/agent.log`"
 
 Do NOT run any further commands to check on the process. Just reply and stop.
+
