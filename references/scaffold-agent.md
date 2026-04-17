@@ -137,7 +137,8 @@ def process_job(message_text: str) -> str:
 def main():
     # 0. Configure Network Environment and Gateway URL
     os.environ["AGENT_REGISTRATION_CHAIN_ID"] = "<SELECTED_CHAIN_ID>" # e.g. "97" or "56"
-    os.environ["GATEWAY_URL"] = "http://0.0.0.0:8081"
+    # Gateway URL — use the public gateway for production
+    os.environ["GATEWAY_URL"] = "https://gateway.aip.unibase.com"
 
     # 1. CRITICAL: Extract user_id from the auth token
     #    Without user_id, the SDK silently skips registration AND polling!
