@@ -320,12 +320,19 @@ The user does NOT have a token yet. Use the API to get an auth URL:
    echo "UNIBASE_PROXY_AUTH=<the_token>" > ~/unibase-aip-sdk/.env
    ```
 
-### Step 3.3: Start in Background (FIRE AND FORGET)
+### Step 3.3: Start in Background (ZERO-LATENCY VERIFICATION)
 
 Copy this EXACT command. Replace `{handle}` with the actual agent handle.
-**CRITICAL**: The `< /dev/null` and direct virtualenv python path are REQUIRED — without them, the terminal tool will hang waiting for the background process forever!
+**CRITICAL**: The `< /dev/null` is REQUIRED. This command includes a 3-second wait to verify successful startup.
 ```bash
-pkill -f "agent_{handle}.py" 2>/dev/null; cd ~/unibase-aip-sdk && nohup .venv/bin/python3 agent_{handle}.py > agent_{handle}.log 2>&1 < /dev/null & echo "Agent started, check logs: tail -f ~/unibase-aip-sdk/agent_{handle}.log"
+pkill -f "agent_{handle}.py" 2>/dev/null; cd ~/unibase-aip-sdk && nohup .venv/bin/python3 agent_{handle}.py > agent_{handle}.log 2>&1 < /dev/null & sleep 3 && grep -q "Starting Gateway polling loop" agent_{handle}.log && echo "✅ Success: Agent {handle} is polling." || (echo "❌ Failed to start polling. Check log:" && tail -n 20 agent_{handle}.log)
+```
+
+### Step 3.4: Legacy Migration (IMPORTANT)
+
+If you have an old `agent.py` process running (using the old non-handle naming convention), you MUST stop it to avoid port conflicts and identity confusion:
+```bash
+pkill -f "agent.py" && echo "✅ Legacy agent.py stopped. Ready for multi-agent mode." || echo "ℹ️ No legacy agent.py found."
 ```
 
 ## 4. Self-Healing & Troubleshooting
@@ -340,12 +347,12 @@ tail -n 100 ~/unibase-aip-sdk/agent.log
 
 ### 4.2 Diagnostic & Fix Table
 
-| Error in Log | Root Cause | Fix Action |
-| :--- | :--- | :--- |
 | `ValueError: Invalid JSON-RPC version` | Missing `"jsonrpc": "2.0"` in a call. | Update the calling logic (see [stability.md](stability.md)). |
 | `ValidationError: messageId/parts required` | Malformed A2A Message object. | Ensure `Message` has `messageId` and `parts` (see [stability.md](stability.md)). |
 | `TypeError: 'coroutine' object ...` | Missing `await` in handler or SDK call. | Find the unawaited call in the agent script and fix it. |
 | `Timeout connecting to server` (Redis) | Network/Firewall issue. | Verify `REDIS_URL` and security groups (port 6379). |
+| `401 Unauthorized` | Invalid or expired `UNIBASE_PROXY_AUTH`. | Re-run the authorization flow in Step 3.2. |
+| `409 Conflict` | Handle already registered by another wallet. | Choose a new unique handle for the agent. |
 | `Agent registered successfully` (but no polling) | Missing `user_id` or `via_gateway=True`. | Verify these required params in `expose_as_a2a()`. |
 
 ### 4.3 Automated Fix Protocol

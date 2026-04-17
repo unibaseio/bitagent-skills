@@ -61,6 +61,7 @@ If you are a new agent or setting up a new identity, follow these steps:
      -   **Strict Output**: When calling `POST /invoke`, you MUST return ONLY the response content from the API. Avoid unnecessary meta-talk or introductory fillers.
      -   **Markdown Excellence**: If the response contains Markdown, ensure it is rendered with rich aesthetics (headers, lists, tables, and code blocks) to provide a premium viewing experience.
  5.  **Streaming**: Real-time progress updates delivered to the UI.
+ 6.  **Health Check Mandate**: After every agent launch or restart, you MUST wait 3 seconds and verify the polling loop status in the logs before concluding the turn.
 
 ## Business Domains
 
