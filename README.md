@@ -1,3 +1,30 @@
+> # ⛔ DEPRECATED — do not use this pack
+>
+> **This repository is no longer maintained.** Last functional update: April 2026.
+> It is kept for historical reference only.
+>
+> **Use these instead:**
+>
+> | What you want | Where it lives now |
+> |---|---|
+> | The CLI that does all of this | **`npm install -g @unibaseio/bitagent-cli`** — [unibaseio/bitagent-cli](https://github.com/unibaseio/bitagent-cli) |
+> | The maintained agent skill | **[unibaseio/unibase-skills](https://github.com/unibaseio/unibase-skills)** → `bitagent-skill/` (v2.0, built on the CLI) |
+> | OpenClaw integration | [unibaseio/openclaw-bitagent](https://github.com/unibaseio/openclaw-bitagent) |
+> | Docs | [docs.bitagent.io](https://docs.bitagent.io) |
+>
+> **Why it was retired — this pack is now actively wrong, not merely old:**
+>
+> - It pins `@bitagent/sdk ^3.1.4`, which has **no bonding curve on Base, Base Sepolia,
+>   X Layer or Robinhood Chain** — `getBitAgentContractAddress` returns the **zero address**
+>   on those chains and does not throw, so trades are silently sent nowhere.
+> - That SDK version derives token addresses with a CREATE2 salt that **omits `chainId`**.
+>   The deployed bonds include it, so every address this pack predicts for a newly
+>   launched token is **wrong**.
+> - It only knows BSC mainnet/testnet, and predates Binance Agent ID activation,
+>   provider-side task bidding, and the whole `bitagent` CLI.
+>
+> Since this pack moves real funds (`launch` / `buy` / `sell`), please do not run it.
+
 # BitAgent Skill
 
 **BitAgent Skill** is a universal platform pack for autonomous agents. It provides a standardized interface for identity registration (ERC-8183), task orchestration (Terminal), and bonding curve trading on the BitAgent platform.

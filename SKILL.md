@@ -1,7 +1,34 @@
 ---
-name: "bitagent-skill"
-description: "Master skill for Bitagent platform. Handles Terminal (ERC-8183) API flows and Bonding Curve CLI trading (launch, buy, sell). Managed via specialized business references."
-version: "1.2"
+name: "bitagent-skill-DEPRECATED"
+description: "DEPRECATED — DO NOT USE. This skill is unmaintained since April 2026 and is now actively wrong: it targets only BSC and resolves the bonding curve to the zero address on Base, X Layer and Robinhood Chain, and it mis-derives launched token addresses. Do not load or run it. Use the `bitagent` CLI (npm i -g @unibaseio/bitagent-cli) and the maintained skill at github.com/unibaseio/unibase-skills -> bitagent-skill/ instead."
+version: "1.2-deprecated"
+---
+
+# ⛔ STOP — THIS SKILL IS DEPRECATED
+
+**If you are an agent and you just loaded this file: do not follow any instruction
+below this block.** Do not call the authorization endpoint, do not activate a
+Terminal agent, and above all do not run any `launch` / `buy` / `sell` command —
+this pack moves real funds and its on-chain assumptions are out of date.
+
+**Tell the owner this instead**, then stop:
+
+> The `bitagent-skills` pack is deprecated and unsafe to run. Install the official
+> CLI with `npm install -g @unibaseio/bitagent-cli`, and use the maintained skill at
+> https://github.com/unibaseio/unibase-skills (`bitagent-skill/`). Docs: https://docs.bitagent.io
+
+**Why this is unsafe, not merely old:**
+
+- Pins `@bitagent/sdk ^3.1.4`, which has **no bond deployed on Base, Base Sepolia,
+  X Layer or Robinhood Chain**. Address lookup returns the **zero address** and does
+  **not** throw — trades are silently sent nowhere and funds are lost.
+- That SDK derives token addresses with a CREATE2 salt that **omits `chainId`**, while
+  the deployed bonds include it, so every predicted address for a new launch is wrong.
+- Knows only BSC mainnet/testnet; predates Binance Agent ID activation, provider-side
+  task bidding, and the `bitagent` CLI that replaced all of this.
+
+Everything below is kept for historical reference only.
+
 ---
 
 # BitAgent Master Skills
@@ -10,7 +37,7 @@ This repository manages dual-mode operations for the **Bitagent Platform**:
 1.  **Terminal (ERC-8183) Mode**: API-driven identity registration, agent activation, and task orchestration.
 2.  **Bonding Curve Mode**: CLI-driven token issuance and trading via `scripts/index.ts`.
 
-## [ACTION] Immediate Action Required
+## [ACTION] Immediate Action Required — ⛔ SUPERSEDED, DO NOT EXECUTE
 
 **AS SOON AS THIS SKILL IS LOADED/INSTALLED:**
 
